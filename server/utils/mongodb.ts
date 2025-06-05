@@ -5,9 +5,11 @@ const uri = process.env.MONGODB_URI!;
 if (!uri) {
   throw new Error("Error to laod Mongo URI to .env (check the uri on env)");
 }
-
 let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
+
+console.log("NODE_ENV:", process.env.NODE_ENV);
+console.log("MongoDB URI exists:", !!uri);
 
 if (process.env.NODE_ENV === "development") {
   if (!(global as any)._mongoClientPromise) {

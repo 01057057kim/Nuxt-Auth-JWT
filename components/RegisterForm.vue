@@ -16,22 +16,20 @@ async function handleRegisterForm() {
     error.value = ''
 
     try {
-        const { data, error: fetchError } = await useFetch('/api/register', {
+        const data = await $fetch('/api/register', {
             method: 'POST',
             body: form.value
         })
 
-        if (fetchError.value) {
-            error.value = fetchError.value.message
-        } else if (data.value?.success) {
-            success.value = data.value.message
-            form.value = { username: '', email: '', password: '' } // reset the form
+        if (data.success) {
+            success.value = data.message
+            form.value = { username: '', email: '', password: '' }
         } else {
-            error.value = data.value?.message || 'Registration failed'
+            error.value = data.message || 'Registration failed'
             form.value = { username: '', email: '', password: '' }
         }
     } catch (err: any) {
-        error.value = err.message || 'Unexpected error'
+        error.value = err.data?.message || err.message || 'Unexpected error'
     }
 }
 
