@@ -53,7 +53,7 @@ async function handleRegisterForm() {
                 <input v-model="form.password" type="password" placeholder="Input Password" class="border-2 p-2">
             </div>
             <div class="flex gap-5">
-                <button type="submit" class="border-2 p-2">Register</button>
+                <button type="submit" class="border-2 p-2 cursor-pointer">Register</button>
                 <NuxtLink to="/" class="border-2 p-2">Back</NuxtLink>
             </div>
             <div>

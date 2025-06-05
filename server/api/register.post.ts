@@ -40,12 +40,13 @@ export default defineEventHandler(async (event: H3Event) => {
       createdAt: new Date(),
     });
 
+    console.log("Registered successfully!");
     return { success: true, message: "Registered successfully!" };
-  } catch (error: unknown) {
-    // error and unknow error handleing
-    if (error instanceof Error) {
-      return { success: false, message: error.message };
-    }
-    return { success: false, message: "Unknown error" };
+  } catch (error: any) {
+    console.error("Register API error:", error);
+    return {
+      success: false,
+      message: "Internal Server Error",
+    };
   }
 });
