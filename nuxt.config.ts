@@ -2,9 +2,15 @@
 export default defineNuxtConfig({
   ssr: true,
   nitro: {
-    preset: 'node-server'
+    preset: "node-server",
   },
-  modules: ['@nuxtjs/tailwindcss'],
-  compatibilityDate: '2025-05-15',
-  devtools: { enabled: true }
-})
+  runtimeConfig: {
+    public: {
+      recaptchaSiteKey: process.env.RECAPTCHA_SITE_KEY,
+    },
+    recaptchaSecretKey: process.env.RECAPTCHA_SECRET_KEY,
+  },
+  modules: ["@nuxtjs/tailwindcss"],
+  compatibilityDate: "2025-05-15",
+  devtools: { enabled: true },
+});

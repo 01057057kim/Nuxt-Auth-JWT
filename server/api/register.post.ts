@@ -1,6 +1,16 @@
 import clientPromise from "~/server/utils/mongodb";
 import bcrypt from "bcrypt";
 import { H3Event } from "h3";
+import validator from "validator";
+
+interface RecaptchaResponse {
+  success: boolean;
+  score?: number;
+  action?: string;
+  challenge_ts?: string;
+  hostname?: string;
+  "error-codes"?: string[];
+}
 
 export default defineEventHandler(async (event: H3Event) => {
   setHeader(event, "Access-Control-Allow-Origin", "*");
@@ -11,13 +21,39 @@ export default defineEventHandler(async (event: H3Event) => {
     console.log("Register API called");
 
     const body = await readBody(event);
-    console.log("Request body received:", {
-      hasEmail: !!body.email,
-      hasUsername: !!body.username,
-      hasPassword: !!body.password,
-    });
+    const token = body.recaptchaToken;
+    const config = useRuntimeConfig();
 
-    const { email, username, password } = body;
+    if (!token) {
+      return { success: false, message: "reCAPTCHA token missing" };
+    }
+
+    const recaptchaRes = await $fetch<RecaptchaResponse>(
+      "https://www.google.com/recaptcha/api/siteverify",
+      {
+        method: "POST",
+        body: new URLSearchParams({
+          secret: config.recaptchaSecretKey,
+          response: token,
+        }).toString(),
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
+    );
+
+    if (!recaptchaRes.success || (recaptchaRes.score ?? 0) < 0.5) {
+      console.log("reCAPTCHA verification failed or suspicious");
+      return {
+        success: false,
+        message:
+          "reCAPTCHA verification failed or suspicious activity detected.",
+      };
+    }
+
+    const email = validator.normalizeEmail(body.email || "") || "";
+    const username = validator.trim(validator.escape(body.username || ""));
+    const password = validator.trim(body.password || "");
 
     if (!email || !username || !password) {
       console.log("Validation failed: missing required fields");
@@ -40,7 +76,7 @@ export default defineEventHandler(async (event: H3Event) => {
     const users = db.collection("users");
 
     console.log("Checking for existing users");
-    const checkEmailExist = await users.findOne({ email: email.toLowerCase() });
+    const checkEmailExist = await users.findOne({ email });
     const checkUsernameExist = await users.findOne({ username });
 
     if (checkEmailExist) {
@@ -59,7 +95,7 @@ export default defineEventHandler(async (event: H3Event) => {
     console.log("Inserting new user...");
     await users.insertOne({
       username,
-      email: email.toLowerCase(),
+      email,
       password: hashed,
       createdAt: new Date(),
     });
