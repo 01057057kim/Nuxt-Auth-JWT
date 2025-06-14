@@ -1,15 +1,29 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 
 const form = ref({
     username: '',
     email: '',
-    password: '',
+    password: ''
 })
 
 const success = ref('')
 const error = ref('')
+const recaptchaReady = ref(false)
+
 const config = useRuntimeConfig()
+
+onMounted(() => {
+    if (process.client) {
+        const checkGrecaptcha = setInterval(() => {
+            // @ts-ignore
+            if (window.grecaptcha) {
+                recaptchaReady.value = true
+                clearInterval(checkGrecaptcha)
+            }
+        }, 100)
+    }
+})
 
 async function handleRegisterForm() {
     success.value = ''
@@ -21,35 +35,37 @@ async function handleRegisterForm() {
         password: form.value.password.trim()
     }
 
+    if (!recaptchaReady.value) {
+        error.value = 'reCAPTCHA not ready. Please try again later.'
+        return
+    }
+
     try {
         // @ts-ignore
-        await grecaptcha.ready(async () => {
-            // @ts-ignore
-            const token = await grecaptcha.execute(config.public.recaptchaSiteKey, {
-                action: 'register'
-            })
+        const token = await window.grecaptcha.execute(config.public.recaptchaSiteKey, {
+            action: 'register'
+        })
 
-            const data = await $fetch('/api/register', {
-                method: 'POST',
-                body: {
-                    ...payload,
-                    recaptchaToken: token
-                }
-            })
-
-            if (data.success) {
-                success.value = data.message
-                form.value = { username: '', email: '', password: '' }
-            } else {
-                error.value = data.message || 'Registration failed'
-                form.value = { username: '', email: '', password: '' }
+        const data = await $fetch('/api/register', {
+            method: 'POST',
+            body: {
+                ...payload,
+                recaptchaToken: token
             }
         })
+
+        if (data.success) {
+            success.value = data.message
+            form.value = { username: '', email: '', password: '' }
+        } else {
+            error.value = data.message || 'Registration failed'
+        }
     } catch (err: any) {
         error.value = err.data?.message || err.message || 'Unexpected error'
     }
 }
 </script>
+
 
 
 <template>

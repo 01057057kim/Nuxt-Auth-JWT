@@ -50,6 +50,10 @@ export default defineEventHandler(async (event: H3Event) => {
           "reCAPTCHA verification failed or suspicious activity detected.",
       };
     }
+    console.log("reCAPTCHA verified successfully!");
+    console.log("Score:", recaptchaRes.score);
+    console.log("Action:", recaptchaRes.action);
+    console.log("Hostname:", recaptchaRes.hostname);
 
     const email = validator.normalizeEmail(body.email || "") || "";
     const username = validator.trim(validator.escape(body.username || ""));
