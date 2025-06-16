@@ -37,6 +37,7 @@ export default defineEventHandler(async (event: H3Event) => {
     const csrfToken = event.req.headers["x-csrf-token"];
     const token = body.recaptchaToken;
     const config = useRuntimeConfig();
+    console.log("reCAPTCHA secret from config:", config.recaptchaSecretKey);
 
     console.log(
       "[Register] Verifying CSRF - Secret:",
