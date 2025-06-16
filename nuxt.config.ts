@@ -8,7 +8,7 @@ export default defineNuxtConfig({
     public: {
       recaptchaSiteKey: process.env.NUXT_PUBLIC_RECAPTCHA_SITE_KEY,
     },
-    recaptchaSecretKey: process.env.NUXT_PUBLIC_RECAPTCHA_SECRET_KEY,
+    recaptchaSecretKey: process.env.RECAPTCHA_SECRET_KEY,
   },
   modules: ["@nuxtjs/tailwindcss"],
   compatibilityDate: "2025-05-15",
