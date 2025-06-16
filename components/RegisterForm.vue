@@ -20,6 +20,7 @@ const csrfToken = ref('');
 
 const isSubmitting = ref(false);
 
+
 onMounted(async () => {
     if (process.client) {
         const checkGrecaptcha = setInterval(() => {
@@ -109,8 +110,6 @@ async function handleRegisterForm() {
     }
 }
 </script>
-
-
 
 <template>
     <div class="bg-orange-100 p-10 flex flex-col items-start justify-center">

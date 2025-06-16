@@ -59,10 +59,16 @@ export default defineEventHandler(async (event: H3Event) => {
     }
 
     console.log("[Register] CSRF verification successful");
+    console.log("[Register] reCAPTCHA token received:", token);
 
-    if (!token) {
-      return { success: false, message: "reCAPTCHA token missing" };
+    if (!token || typeof token !== "string") {
+      return { success: false, message: "reCAPTCHA token missing or invalid" };
     }
+
+    console.log(
+      "[Register] Using reCAPTCHA secret:",
+      !!config.recaptchaSecretKey ? "exists" : "missing"
+    );
     // Validate reCAPTCHA
     const recaptchaRes = await $fetch<RecaptchaResponse>(
       "https://www.google.com/recaptcha/api/siteverify",
