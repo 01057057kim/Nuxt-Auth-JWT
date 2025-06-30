@@ -4,7 +4,7 @@ A modern authentication template built with **Nuxt3** and **Nitro**, featuring s
 
 ## 🚀 Live Demo
 
-- [Live App](https://nuxt-auth-jwt.onrender.com)
+- [Live App](https://nuxt-auth-jwt.onrender.com) Working on it
 
 ## ✨ Features
 
