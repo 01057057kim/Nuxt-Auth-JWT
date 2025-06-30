@@ -1,5 +1,6 @@
 import clientPromise from "~/server/utils/mongodb";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import { H3Event, getCookie, readBody, createError } from "h3";
 import validator from "validator";
 import Tokens from "csrf";
@@ -85,16 +86,31 @@ export default defineEventHandler(async (event: H3Event) => {
       return { success: false, message: "Invalid username or password" };
     }
 
-    console.log("[Login] Login successful!");
+    console.log("[Login] Login successful! Generating JWT token...");
+    
+    // Generate JWT token
+    const config = useRuntimeConfig();
+    const token = jwt.sign(
+      { 
+        userId: user._id.toString(), 
+        email: user.email,
+        username: user.username,
+        loginMethod: user.loginMethod || 'username'
+      },
+      config.jwtSecret,
+      { expiresIn: '24h' }
+    );
     
     return {
       success: true,
       message: "Login successful!",
+      token,
       user: {
         username: user.username,
         email: user.email,
         createdAt: user.createdAt,
-        updatedAt: user.updatedAt || user.createdAt
+        updatedAt: user.updatedAt || user.createdAt,
+        loginMethod: user.loginMethod || 'username'
       }
     };
   } catch (error: any) {

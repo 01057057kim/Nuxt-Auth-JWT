@@ -159,6 +159,7 @@ export default defineEventHandler(async (event: H3Event) => {
       email,
       password: hashed,
       createdAt: new Date(),
+      loginMethod: 'username'
     });
 
     console.log("[Register] User registered successfully!");
