@@ -32,8 +32,8 @@ A modern authentication template built with **Nuxt3** and **Nitro**, featuring s
 
 1. **Clone the repo:**
    ```bash
-   git clone https://github.com/your-username/your-repo.git
-   cd your-repo
+   git clone https://github.com/01057057kim/Nuxt-Auth-JWT.git
+   cd Nuxt-Auth-JWT
    ```
 
 2. **Install dependencies:**
