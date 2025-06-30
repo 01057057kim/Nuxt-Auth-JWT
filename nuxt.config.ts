@@ -27,19 +27,17 @@ export default defineNuxtConfig({
       ]
     }
   },
-   runtimeConfig: {
-    jwtSecret: '', // JWT_SECRET (server only)
-    recaptchaSecretKey: '', // RECAPTCHA_SECRET_KEY (server only)
-    googleClientSecret: '', // GOOGLE_CLIENT_SECRET (server only)
-    googleClientId: '', // GOOGLE_CLIENT_ID (server only)
-    googleRedirectUri: '', // GOOGLE_REDIRECT_URI (server only)
-    mongodbUri: '', // MONGODB_URI (server only)
-    saltRounds: '', // SALT_ROUNDS (server only),
+  runtimeConfig: {
+    recaptchaSecretKey: process.env.RECAPTCHA_SECRET_KEY,
+    jwtSecret: process.env.JWT_SECRET,
+    googleRedirectUri: process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/api/auth/callback/google',
+    googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
+
     public: {
-      recaptchaSiteKey: '', // NUXT_PUBLIC_RECAPTCHA_SITE_KEY (client+server)
-      googleClientId: '', // NUXT_PUBLIC_GOOGLE_CLIENT_ID (client+server)
-      googleRedirectUri: '', // NUXT_PUBLIC_GOOGLE_REDIRECT_URI (client+server)
-    }
+      recaptchaSiteKey: process.env.NUXT_PUBLIC_RECAPTCHA_SITE_KEY,
+      googleClientId: process.env.GOOGLE_CLIENT_ID,
+      googleRedirectUri: process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/api/auth/callback/google',
+    },
   },
   modules: [
     "@nuxtjs/tailwindcss"
