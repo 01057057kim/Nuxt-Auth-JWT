@@ -1,6 +1,6 @@
 # Auth With JWT – Nuxt3 & Nitro Full Stack Template
 
-A modern authentication template built with **Nuxt3** and **Nitro**, featuring secure JWT-based authentication, social login (Google OAuth2), and best practices for full-stack security.
+A Web authentication template built with **Nuxt3** and **Nitro**, secure JWT-based authentication, social login (Google OAuth2).
 
 ## 🚀 Live Demo
 
