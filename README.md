@@ -2,11 +2,11 @@
 
 A Web authentication template built with **Nuxt3** and **Nitro**, secure JWT-based authentication, social login (Google OAuth2).
 
-## 🚀 Live Demo
+## Live Demo
 
 - [Live App](https://nuxt-auth-jwt.onrender.com) Working on it
 
-## ✨ Features
+## Features
 
 - **Full Stack Nuxt3 + Nitro**: Universal rendering, API routes, and server-side logic.
 - **JWT Authentication**: Secure, stateless user sessions.
@@ -18,7 +18,7 @@ A Web authentication template built with **Nuxt3** and **Nitro**, secure JWT-bas
 - **Password Requirements**: Enforced strong password policy.
 - **Multi-factor Ready**: Easily extendable for email or other factors.
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - [Nuxt3](https://nuxt.com/) (Vue 3)
 - [Nitro](https://nitro.unjs.io/) server engine
@@ -28,7 +28,7 @@ A Web authentication template built with **Nuxt3** and **Nitro**, secure JWT-bas
 - Google OAuth2
 - reCAPTCHA v3
 
-## 📦 Getting Started
+## Getting Started
 
 1. **Clone the repo:**
    ```bash
