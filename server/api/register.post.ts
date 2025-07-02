@@ -38,6 +38,8 @@ export default defineEventHandler(async (event: H3Event) => {
     const token = body.recaptchaToken;
     const config = useRuntimeConfig();
     console.log("reCAPTCHA secret from config:", config.recaptchaSecretKey);
+    console.log("reCAPTCHA secret available:", !!config.recaptchaSecretKey);
+    console.log("reCAPTCHA secret length:", config.recaptchaSecretKey ? config.recaptchaSecretKey.length : 0);
 
     console.log(
       "[Register] Verifying CSRF - Secret:",
@@ -70,6 +72,15 @@ export default defineEventHandler(async (event: H3Event) => {
       "[Register] Using reCAPTCHA secret:",
       !!config.recaptchaSecretKey ? "exists" : "missing"
     );
+    
+    if (!config.recaptchaSecretKey) {
+      console.error("[Register] RECAPTCHA_SECRET_KEY environment variable is not set!");
+      throw createError({
+        statusCode: 500,
+        statusMessage: "Server configuration error: reCAPTCHA secret not configured",
+      });
+    }
+    
     // Validate reCAPTCHA
     const recaptchaRes = await $fetch<RecaptchaResponse>(
       "https://www.google.com/recaptcha/api/siteverify",

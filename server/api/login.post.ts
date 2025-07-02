@@ -90,6 +90,19 @@ export default defineEventHandler(async (event: H3Event) => {
     
     // Generate JWT token
     const config = useRuntimeConfig();
+    
+    // Debug: Check if JWT secret is available
+    console.log("[Login] JWT Secret available:", !!config.jwtSecret);
+    console.log("[Login] JWT Secret length:", config.jwtSecret ? config.jwtSecret.length : 0);
+    
+    if (!config.jwtSecret) {
+      console.error("[Login] JWT_SECRET environment variable is not set!");
+      throw createError({
+        statusCode: 500,
+        statusMessage: "Server configuration error: JWT secret not configured",
+      });
+    }
+    
     const token = jwt.sign(
       { 
         userId: user._id.toString(), 
