@@ -37,9 +37,14 @@ export default defineEventHandler(async (event: H3Event) => {
     const csrfToken = event.req.headers["x-csrf-token"];
     const token = body.recaptchaToken;
     const config = useRuntimeConfig();
-    console.log("reCAPTCHA secret from config:", config.recaptchaSecretKey);
-    console.log("reCAPTCHA secret available:", !!config.recaptchaSecretKey);
-    console.log("reCAPTCHA secret length:", config.recaptchaSecretKey ? config.recaptchaSecretKey.length : 0);
+    
+    // Try to get reCAPTCHA secret from runtime config or directly from process.env
+    const recaptchaSecretKey = config.recaptchaSecretKey || process.env.RECAPTCHA_SECRET_KEY;
+    
+    console.log("reCAPTCHA secret from config:", recaptchaSecretKey);
+    console.log("reCAPTCHA secret available:", !!recaptchaSecretKey);
+    console.log("reCAPTCHA secret length:", recaptchaSecretKey ? recaptchaSecretKey.length : 0);
+    console.log("reCAPTCHA secret source:", config.recaptchaSecretKey ? "runtime config" : "process.env");
 
     console.log(
       "[Register] Verifying CSRF - Secret:",
@@ -73,7 +78,7 @@ export default defineEventHandler(async (event: H3Event) => {
       !!config.recaptchaSecretKey ? "exists" : "missing"
     );
     
-    if (!config.recaptchaSecretKey) {
+    if (!recaptchaSecretKey) {
       console.error("[Register] RECAPTCHA_SECRET_KEY environment variable is not set!");
       throw createError({
         statusCode: 500,
@@ -87,7 +92,7 @@ export default defineEventHandler(async (event: H3Event) => {
       {
         method: "POST",
         body: new URLSearchParams({
-          secret: config.recaptchaSecretKey,
+          secret: recaptchaSecretKey,
           response: token,
         }).toString(),
         headers: {

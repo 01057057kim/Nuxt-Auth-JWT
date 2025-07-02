@@ -28,10 +28,10 @@ export default defineNuxtConfig({
     }
   },
   runtimeConfig: {
-    recaptchaSecretKey: process.env.RECAPTCHA_SECRET_KEY,
-    jwtSecret: process.env.JWT_SECRET,
+    recaptchaSecretKey: '',
+    jwtSecret: '',
     googleRedirectUri: process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/api/auth/callback/google',
-    googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    googleClientSecret: '',
 
     public: {
       recaptchaSiteKey: process.env.NUXT_PUBLIC_RECAPTCHA_SITE_KEY,

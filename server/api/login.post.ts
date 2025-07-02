@@ -91,11 +91,15 @@ export default defineEventHandler(async (event: H3Event) => {
     // Generate JWT token
     const config = useRuntimeConfig();
     
-    // Debug: Check if JWT secret is available
-    console.log("[Login] JWT Secret available:", !!config.jwtSecret);
-    console.log("[Login] JWT Secret length:", config.jwtSecret ? config.jwtSecret.length : 0);
+    // Try to get JWT secret from runtime config or directly from process.env
+    const jwtSecret = config.jwtSecret || process.env.JWT_SECRET;
     
-    if (!config.jwtSecret) {
+    // Debug: Check if JWT secret is available
+    console.log("[Login] JWT Secret available:", !!jwtSecret);
+    console.log("[Login] JWT Secret length:", jwtSecret ? jwtSecret.length : 0);
+    console.log("[Login] JWT Secret source:", config.jwtSecret ? "runtime config" : "process.env");
+    
+    if (!jwtSecret) {
       console.error("[Login] JWT_SECRET environment variable is not set!");
       throw createError({
         statusCode: 500,
@@ -110,7 +114,7 @@ export default defineEventHandler(async (event: H3Event) => {
         username: user.username,
         loginMethod: user.loginMethod || 'username'
       },
-      config.jwtSecret,
+      jwtSecret,
       { expiresIn: '24h' }
     );
     

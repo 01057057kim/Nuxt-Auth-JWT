@@ -29,7 +29,17 @@ export default defineEventHandler(async (event) => {
 
   try {
     const config = useRuntimeConfig()
-    const decoded = jwt.verify(token, config.jwtSecret)
+    const jwtSecret = config.jwtSecret || process.env.JWT_SECRET
+    
+    if (!jwtSecret) {
+      console.error("[Auth Middleware] JWT_SECRET environment variable is not set!")
+      throw createError({
+        statusCode: 500,
+        statusMessage: "Server configuration error: JWT secret not configured",
+      })
+    }
+    
+    const decoded = jwt.verify(token, jwtSecret)
     
     // Add user info to event context
     event.context.user = decoded
