@@ -28,16 +28,16 @@ export default defineNuxtConfig({
     }
   },
   runtimeConfig: {
-    recaptchaSecretKey: '',
-    jwtSecret: '',
+    jwtSecret: process.env.JWT_SECRET, 
+    recaptchaSecretKey: process.env.RECAPTCHA_SECRET_KEY,
+    googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
     googleRedirectUri: process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/api/auth/callback/google',
-    googleClientSecret: '',
-
+  
     public: {
       recaptchaSiteKey: process.env.NUXT_PUBLIC_RECAPTCHA_SITE_KEY,
       googleClientId: process.env.GOOGLE_CLIENT_ID,
       googleRedirectUri: process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/api/auth/callback/google',
-    },
+    }
   },
   modules: [
     "@nuxtjs/tailwindcss"
