@@ -32,7 +32,7 @@ A Web authentication template built with **Nuxt3** and **Nitro**, secure JWT-bas
 
 1. **Clone the repo:**
    ```bash
-   git clone https://github.com/01057057kim/Nuxt-Auth-JWT.git
+   git clone --branch development https://github.com/01057057kim/Nuxt-Auth-JWT.git
    cd Nuxt-Auth-JWT
    ```
 

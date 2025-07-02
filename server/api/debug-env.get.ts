@@ -20,8 +20,8 @@ export default defineEventHandler(async (event) => {
         source: config.recaptchaSecretKey ? "runtime config" : (process.env.RECAPTCHA_SECRET_KEY ? "process.env" : "not found")
       },
       googleClientId: {
-        exists: !!config.public.googleClientId,
-        preview: config.public.googleClientId ? `${config.public.googleClientId.substring(0, 20)}...` : "undefined",
+        exists: !!(config.public.googleClientId || process.env.GOOGLE_CLIENT_ID),
+        preview: (config.public.googleClientId || process.env.GOOGLE_CLIENT_ID) ? `${(config.public.googleClientId || process.env.GOOGLE_CLIENT_ID || "").substring(0, 20)}...` : "undefined",
         source: config.public.googleClientId ? "runtime config" : (process.env.GOOGLE_CLIENT_ID ? "process.env" : "not found"),
         rawValue: config.public.googleClientId || process.env.GOOGLE_CLIENT_ID || "undefined"
       },
