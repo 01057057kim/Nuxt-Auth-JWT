@@ -30,13 +30,13 @@ export default defineNuxtConfig({
   runtimeConfig: {
     recaptchaSecretKey: '',
     jwtSecret: '',
-    googleRedirectUri: process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/api/auth/callback/google',
+    googleRedirectUri: process.env.GOOGLE_REDIRECT_URI || 'https://nuxt-auth-jwt.onrender.com/api/auth/callback/google',
     googleClientSecret: '',
 
     public: {
       recaptchaSiteKey: process.env.NUXT_PUBLIC_RECAPTCHA_SITE_KEY,
       googleClientId: process.env.GOOGLE_CLIENT_ID,
-      googleRedirectUri: process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/api/auth/callback/google',
+      googleRedirectUri: process.env.GOOGLE_REDIRECT_URI || 'https://nuxt-auth-jwt.onrender.com/api/auth/callback/google',
     },
   },
   modules: [

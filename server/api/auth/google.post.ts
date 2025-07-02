@@ -34,14 +34,27 @@ export default defineEventHandler(async (event) => {
     }
     const config = useRuntimeConfig()
 
-    console.log('Config clientId:', !!config.public.googleClientId)
-    console.log('Config clientSecret:', !!config.googleClientSecret)
-    console.log('Config redirectUri:', !!config.googleRedirectUri)
+    // Try to get secrets from runtime config or directly from process.env
+    const googleClientSecret = config.googleClientSecret || process.env.GOOGLE_CLIENT_SECRET;
+    const googleClientId = config.public.googleClientId || process.env.GOOGLE_CLIENT_ID;
+    const jwtSecret = config.jwtSecret || process.env.JWT_SECRET;
 
-    if (!config.googleClientSecret) {
+    console.log('Config clientId:', !!googleClientId)
+    console.log('Config clientSecret:', !!googleClientSecret)
+    console.log('Config redirectUri:', !!config.googleRedirectUri)
+    console.log('Config jwtSecret:', !!jwtSecret)
+
+    if (!googleClientSecret) {
       throw createError({
         statusCode: 500,
         statusMessage: 'Google OAuth is not properly configured'
+      })
+    }
+
+    if (!jwtSecret) {
+      throw createError({
+        statusCode: 500,
+        statusMessage: 'JWT secret is not properly configured'
       })
     }
     const tokenResponse = await $fetch<GoogleTokenResponse>('https://oauth2.googleapis.com/token', {
@@ -51,8 +64,8 @@ export default defineEventHandler(async (event) => {
       },
       body: new URLSearchParams({
         code,
-        client_id: config.public.googleClientId!,
-        client_secret: config.googleClientSecret,
+        client_id: googleClientId!,
+        client_secret: googleClientSecret,
         redirect_uri: config.googleRedirectUri,
         grant_type: 'authorization_code'
       })
@@ -115,7 +128,7 @@ export default defineEventHandler(async (event) => {
         email: user.email,
         loginMethod: 'google'
       },
-      config.jwtSecret,
+      jwtSecret,
       { expiresIn: '24h' }
     )
 

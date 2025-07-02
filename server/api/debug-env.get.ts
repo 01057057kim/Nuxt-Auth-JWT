@@ -21,7 +21,9 @@ export default defineEventHandler(async (event) => {
       },
       googleClientId: {
         exists: !!config.public.googleClientId,
-        preview: config.public.googleClientId ? `${config.public.googleClientId.substring(0, 20)}...` : "undefined"
+        preview: config.public.googleClientId ? `${config.public.googleClientId.substring(0, 20)}...` : "undefined",
+        source: config.public.googleClientId ? "runtime config" : (process.env.GOOGLE_CLIENT_ID ? "process.env" : "not found"),
+        rawValue: config.public.googleClientId || process.env.GOOGLE_CLIENT_ID || "undefined"
       },
       googleClientSecret: {
         exists: !!(config.googleClientSecret || process.env.GOOGLE_CLIENT_SECRET),
