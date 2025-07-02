@@ -87,16 +87,18 @@ const handleLogin = async () => {
     }
 }
 
-const handleGoogleLogin = () => {
+const handleGoogleLogin = async () => {
 
     console.log('Google login start:', true)
     
     googleLoading.value = true
     message.value = ''
     try {
-        const config = useRuntimeConfig()
-        const clientId = config.public.googleClientId
-        const redirectUri = config.public.googleRedirectUri
+        // Get Google OAuth configuration from server
+        const googleConfig = await $fetch('/api/google-config')
+        
+        const clientId = googleConfig.googleClientId
+        const redirectUri = googleConfig.googleRedirectUri
 
         console.log('Client ID present:', !!clientId)
         console.log('Redirect URI present:', !!redirectUri)
@@ -128,6 +130,7 @@ const handleGoogleLogin = () => {
 
         console.log('Redirected:', true)
     } catch (error) {
+        console.error('Google OAuth error:', error)
         message.value = 'Failed to initiate Google OAuth'
         messageClass.value = 'text-red-600'
         googleLoading.value = false
