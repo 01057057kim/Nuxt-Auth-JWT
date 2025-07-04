@@ -32,6 +32,16 @@ const googleLoading = ref(false)
 const message = ref('')
 const messageClass = ref('')
 
+const showForgot = ref(false)
+const forgotStep = ref(1) // 1: email, 2: code, 3: new password
+const forgotEmail = ref('')
+const forgotCode = ref('')
+const forgotNewPassword = ref('')
+const forgotConfirmPassword = ref('')
+const forgotMessage = ref('')
+const forgotMessageClass = ref('')
+const forgotLoading = ref(false)
+
 // Check for URL parameters on mount
 onMounted(() => {
     const urlParams = new URLSearchParams(window.location.search)
@@ -136,6 +146,82 @@ const handleGoogleLogin = async () => {
         googleLoading.value = false
     }
 }
+
+function openForgot() {
+    showForgot.value = true
+    forgotStep.value = 1
+    forgotEmail.value = ''
+    forgotCode.value = ''
+    forgotNewPassword.value = ''
+    forgotConfirmPassword.value = ''
+    forgotMessage.value = ''
+    forgotMessageClass.value = ''
+}
+
+function closeForgot() {
+    showForgot.value = false
+}
+
+async function handleForgotEmail() {
+    forgotLoading.value = true
+    forgotMessage.value = ''
+    try {
+        const res: any = await $fetch('/api/forgot-password-request', {
+            method: 'POST',
+            body: { email: forgotEmail.value }
+        })
+        forgotMessage.value = 'A reset code has been sent, Check your email.'
+        forgotMessageClass.value = 'text-green-600'
+        forgotStep.value = 2
+    } catch (err: any) {
+        forgotMessage.value = err.data?.message || err.message || 'Unexpected error'
+        forgotMessageClass.value = 'text-red-600'
+    } finally {
+        forgotLoading.value = false
+    }
+}
+
+async function handleForgotCode() {
+    forgotLoading.value = true
+    forgotMessage.value = ''
+    if (!forgotCode.value) {
+        forgotMessage.value = 'Please enter the verification code.'
+        forgotMessageClass.value = 'text-red-600'
+        forgotLoading.value = false
+        return
+    }
+    forgotStep.value = 3
+    forgotLoading.value = false
+}
+
+async function handleForgotReset() {
+    forgotLoading.value = true
+    forgotMessage.value = ''
+    try {
+        const res: any = await $fetch('/api/forgot-password-verify', {
+            method: 'POST',
+            body: {
+                email: forgotEmail.value,
+                code: forgotCode.value,
+                newPassword: forgotNewPassword.value,
+                confirmPassword: forgotConfirmPassword.value
+            }
+        })
+        if (res.success) {
+            forgotMessage.value = res.message
+            forgotMessageClass.value = 'text-green-600'
+            setTimeout(() => { showForgot.value = false }, 2000)
+        } else {
+            forgotMessage.value = res.message || 'Reset failed'
+            forgotMessageClass.value = 'text-red-600'
+        }
+    } catch (err: any) {
+        forgotMessage.value = err.data?.message || err.message || 'Unexpected error'
+        forgotMessageClass.value = 'text-red-600'
+    } finally {
+        forgotLoading.value = false
+    }
+}
 </script>
 <template>
     <div class="bg-orange-100 p-10 flex flex-col items-start justify-center">
@@ -173,6 +259,27 @@ const handleGoogleLogin = async () => {
                 <NuxtLink to="/" class="border-2 p-2">Back</NuxtLink>
             </div>
         </form>
+        <button class="mt-2 text-blue-600 underline" @click="openForgot">Forgot Password?</button>
+        <div v-if="showForgot" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+            <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md relative">
+                <button class="absolute top-2 right-2 text-gray-500" @click="closeForgot">&times;</button>
+                <h2 class="text-xl font-bold mb-4">Forgot Password</h2>
+                <form v-if="forgotStep === 1" @submit.prevent="handleForgotEmail" class="flex flex-col gap-4">
+                    <input v-model="forgotEmail" type="email" placeholder="Enter your email" class="border-2 p-2" required />
+                    <button type="submit" :disabled="forgotLoading" class="border-2 p-2">{{ forgotLoading ? 'Sending...' : 'Send Code' }}</button>
+                </form>
+                <form v-else-if="forgotStep === 2" @submit.prevent="handleForgotCode" class="flex flex-col gap-4">
+                    <input v-model="forgotCode" type="text" placeholder="Enter verification code" class="border-2 p-2" required />
+                    <button type="submit" :disabled="forgotLoading" class="border-2 p-2">{{ forgotLoading ? 'Checking...' : 'Verify Code' }}</button>
+                </form>
+                <form v-else @submit.prevent="handleForgotReset" class="flex flex-col gap-4">
+                    <input v-model="forgotNewPassword" type="password" placeholder="New password" class="border-2 p-2" required />
+                    <input v-model="forgotConfirmPassword" type="password" placeholder="Confirm new password" class="border-2 p-2" required />
+                    <button type="submit" :disabled="forgotLoading" class="border-2 p-2">{{ forgotLoading ? 'Resetting...' : 'Reset Password' }}</button>
+                </form>
+                <div v-if="forgotMessage" :class="forgotMessageClass" class="mt-2">{{ forgotMessage }}</div>
+            </div>
+        </div>
         
         <!-- Google OAuth Button -->
         <div class="mt-6 w-full">

@@ -9,6 +9,7 @@ interface User {
   updatedAt: string
   loginMethod?: string
   picture?: string
+  emailVerified?: boolean
 }
 
 const user = ref<User | null>(null)
@@ -152,6 +153,11 @@ const logout = () => {
         <div>
           <label class="font-bold">Email: </label>
           <span>{{ user.email }}</span>
+        </div>
+        <div>
+          <label class="font-bold">Email Verified: </label>
+          <span v-if="user.loginMethod === 'google' || user.emailVerified">Yes</span>
+          <span v-else>No</span>
         </div>
         
         <div v-if="!user.loginMethod || user.loginMethod !== 'google'">

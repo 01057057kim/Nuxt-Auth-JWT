@@ -48,7 +48,8 @@ export default defineEventHandler(async (event) => {
         createdAt: userData.createdAt,
         updatedAt: userData.updatedAt || userData.createdAt,
         loginMethod: userData.loginMethod || 'username',
-        picture: userData.picture
+        picture: userData.picture,
+        emailVerified: userData.emailVerified || false
       }
     }
   } catch (error: any) {

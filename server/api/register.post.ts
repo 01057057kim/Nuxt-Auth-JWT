@@ -4,6 +4,8 @@ import { H3Event, getCookie, readBody, createError } from "h3";
 import validator from "validator";
 import { validatePassword } from "../../utils/validatePassword";
 import Tokens from "csrf";
+import nodemailer from "nodemailer";
+import crypto from "crypto";
 
 interface RecaptchaResponse {
   success: boolean;
@@ -155,7 +157,7 @@ export default defineEventHandler(async (event: H3Event) => {
     const checkEmailExist = await users.findOne({ email });
     const checkUsernameExist = await users.findOne({ username });
 
-    // check email and username existence
+    // check email and username exist or not
     if (checkEmailExist) {
       console.log("[Register] Email already exists");
       return { success: false, message: "Email already registered" };
@@ -169,13 +171,45 @@ export default defineEventHandler(async (event: H3Event) => {
     console.log("[Register] Hashing password...");
     const hashed = await bcrypt.hash(password, saltRounds);
 
+    // alphanumeric, 8 chars verification code
+    const verificationCode = crypto.randomBytes(4).toString('hex');
+    const verificationCodeExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
     console.log("[Register] Inserting new user...");
     await users.insertOne({
       username,
       email,
       password: hashed,
       createdAt: new Date(),
-      loginMethod: 'username'
+      loginMethod: 'username',
+      emailVerified: false,
+      verificationCode,
+      verificationCodeExpires
+    });
+
+    // Send verification email
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT) || 587,
+      secure: false,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
+      }
+    });
+
+    await transporter.sendMail({
+      from: process.env.SMTP_FROM || 'no-reply@example.com',
+      to: email,
+      subject: 'Verify your email',
+      text: `Your verification code is: ${verificationCode}\nThis code will expire in 15 minutes.`,
+      html: `<div style="font-family: Arial, sans-serif; max-width: 400px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; background: #fafafa;">
+        <h2 style="color: #ff9800;">Welcome to Our App!</h2>
+        <p>Thank you for registering. Please use the code below to verify your email address:</p>
+        <div style="font-size: 2em; font-weight: bold; color: #333; letter-spacing: 2px; margin: 20px 0;">${verificationCode}</div>
+        <p style="color: #888;">This code will expire in 15 minutes.</p>
+        <p>If you did not request this, please ignore this email.</p>
+      </div>`
     });
 
     console.log("[Register] User registered successfully!");

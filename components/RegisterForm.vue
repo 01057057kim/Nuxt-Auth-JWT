@@ -20,6 +20,11 @@ const csrfToken = ref('');
 
 const isSubmitting = ref(false);
 
+const showVerification = ref(false)
+const verificationCode = ref('')
+const verificationError = ref('')
+const verificationSuccess = ref('')
+const registeredEmail = ref('')
 
 onMounted(async () => {
     if (process.client) {
@@ -100,6 +105,8 @@ async function handleRegisterForm() {
         if (data.success) {
             success.value = data.message;
             form.value = { username: '', email: '', password: '', confirmPassword: '' };
+            showVerification.value = true;
+            registeredEmail.value = payload.email;
         } else {
             error.value = data.message || 'Registration failed';
         }
@@ -109,12 +116,31 @@ async function handleRegisterForm() {
         isSubmitting.value = false;
     }
 }
+
+async function handleVerifyCode() {
+    verificationError.value = ''
+    verificationSuccess.value = ''
+    try {
+        const res: any = await $fetch('/api/verify-email', {
+            method: 'POST',
+            body: { email: registeredEmail.value, code: verificationCode.value }
+        })
+        if (res.success) {
+            verificationSuccess.value = res.message
+            showVerification.value = false
+        } else {
+            verificationError.value = res.message || 'Verification failed'
+        }
+    } catch (err: any) {
+        verificationError.value = err.data?.message || err.message || 'Unexpected error'
+    }
+}
 </script>
 
 <template>
     <div class="bg-orange-100 p-10 flex flex-col items-start justify-center">
         <h1 class="mb-4 text-2xl font-bold">Register</h1>
-        <form action="" @submit.prevent="handleRegisterForm" class="flex flex-col gap-4">
+        <form v-if="!showVerification" action="" @submit.prevent="handleRegisterForm" class="flex flex-col gap-4">
             <div>
                 <label for="">Username: </label>
                 <input v-model="form.username" type="text" placeholder="Input Username" class="border-2 p-2 ml-14"
@@ -147,5 +173,13 @@ async function handleRegisterForm() {
                 <p class="text-red-600 mt-4" v-if="error">{{ error }}</p>
             </div>
         </form>
+        <div v-else class="flex flex-col gap-4 w-full max-w-md mt-6">
+            <h2 class="text-xl font-bold">Verify Your Email</h2>
+            <p>We have sent a verification code to your email. Please enter it below:</p>
+            <input v-model="verificationCode" type="text" placeholder="Enter verification code" class="border-2 p-2" />
+            <button @click="handleVerifyCode" class="border-2 p-2 cursor-pointer">Verify</button>
+            <p class="text-green-600 mt-4" v-if="verificationSuccess">{{ verificationSuccess }}</p>
+            <p class="text-red-600 mt-4" v-if="verificationError">{{ verificationError }}</p>
+        </div>
     </div>
 </template>
