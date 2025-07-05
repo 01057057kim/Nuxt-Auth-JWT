@@ -82,7 +82,11 @@ const handleLogin = async () => {
             }
             
             setTimeout(() => {
-                navigateTo('/Main')
+                if (response.user && response.user.username && response.user.username.toLowerCase() === 'admin') {
+                    navigateTo('/Admin')
+                } else {
+                    navigateTo('/Main')
+                }
             }, 1000)
         } else {
             message.value = response.message
@@ -184,14 +188,23 @@ async function handleForgotEmail() {
 async function handleForgotCode() {
     forgotLoading.value = true
     forgotMessage.value = ''
-    if (!forgotCode.value) {
-        forgotMessage.value = 'Please enter the verification code.'
+    try {
+        const res: any = await $fetch('/api/forgot-password-check-code', {
+            method: 'POST',
+            body: { email: forgotEmail.value, code: forgotCode.value }
+        })
+        if (res.success) {
+            forgotStep.value = 3
+        } else {
+            forgotMessage.value = res.message || 'Invalid code'
+            forgotMessageClass.value = 'text-red-600'
+        }
+    } catch (err: any) {
+        forgotMessage.value = err.data?.message || err.message || 'Unexpected error'
         forgotMessageClass.value = 'text-red-600'
+    } finally {
         forgotLoading.value = false
-        return
     }
-    forgotStep.value = 3
-    forgotLoading.value = false
 }
 
 async function handleForgotReset() {

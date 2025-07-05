@@ -6,6 +6,8 @@ import { validatePassword } from "../../utils/validatePassword";
 import Tokens from "csrf";
 import nodemailer from "nodemailer";
 import crypto from "crypto";
+import rateLimit from '~/server/middleware/rateLimit'
+import { verificationEmailTemplate } from '~/server/utils/emailTemplates'
 
 interface RecaptchaResponse {
   success: boolean;
@@ -18,6 +20,8 @@ interface RecaptchaResponse {
 const tokens = new Tokens();
 
 export default defineEventHandler(async (event: H3Event) => {
+  await rateLimit(event)
+
   setHeader(
     event,
     "Access-Control-Allow-Origin",
@@ -139,6 +143,13 @@ export default defineEventHandler(async (event: H3Event) => {
       };
     }
 
+    if (username.toLowerCase() === 'admin') {
+      return {
+        success: false,
+        message: "Username 'admin' is reserved. Please choose another username."
+      };
+    }
+
     // encrypt password
     const saltRounds = Number(process.env.SALT_ROUNDS) || 10;
     if (isNaN(saltRounds)) {
@@ -198,18 +209,13 @@ export default defineEventHandler(async (event: H3Event) => {
       }
     });
 
+    const { subject, text, html } = verificationEmailTemplate(verificationCode)
     await transporter.sendMail({
       from: process.env.SMTP_FROM || 'no-reply@example.com',
       to: email,
-      subject: 'Verify your email',
-      text: `Your verification code is: ${verificationCode}\nThis code will expire in 15 minutes.`,
-      html: `<div style="font-family: Arial, sans-serif; max-width: 400px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; background: #fafafa;">
-        <h2 style="color: #ff9800;">Welcome to Our App!</h2>
-        <p>Thank you for registering. Please use the code below to verify your email address:</p>
-        <div style="font-size: 2em; font-weight: bold; color: #333; letter-spacing: 2px; margin: 20px 0;">${verificationCode}</div>
-        <p style="color: #888;">This code will expire in 15 minutes.</p>
-        <p>If you did not request this, please ignore this email.</p>
-      </div>`
+      subject,
+      text,
+      html
     });
 
     console.log("[Register] User registered successfully!");

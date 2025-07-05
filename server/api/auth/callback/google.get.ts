@@ -79,7 +79,7 @@ export default defineEventHandler(async (event) => {
     console.log('User info received:', !!userResponse.email)
 
     const client = await clientPromise
-    const db = client.db('google')
+    const db = client.db('auth-nuxt')
 
     console.log('DB connected:', true)
 

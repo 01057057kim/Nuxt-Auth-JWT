@@ -55,6 +55,12 @@ A Web authentication template built with **Nuxt3** and **Nitro**, secure JWT-bas
     GOOGLE_CLIENT_SECRET=
     GOOGLE_REDIRECT_URI=
     JWT_SECRET=
+    
+    SMTP_HOST=
+    SMTP_PORT=
+    SMTP_USER=
+    SMTP_PASS=
+    SMTP_FROM=""
     ```
    Copy to `.env` and fill in your secrets.
 

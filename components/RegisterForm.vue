@@ -135,6 +135,24 @@ async function handleVerifyCode() {
         verificationError.value = err.data?.message || err.message || 'Unexpected error'
     }
 }
+
+async function handleResendVerification() {
+    verificationError.value = ''
+    verificationSuccess.value = ''
+    try {
+        const res: any = await $fetch('/api/resend-verification-code', {
+            method: 'POST',
+            body: { email: registeredEmail.value }
+        })
+        if (res.success) {
+            verificationSuccess.value = res.message
+        } else {
+            verificationError.value = res.message || 'Resend failed'
+        }
+    } catch (err: any) {
+        verificationError.value = err.data?.message || err.message || 'Unexpected error'
+    }
+}
 </script>
 
 <template>
@@ -177,7 +195,10 @@ async function handleVerifyCode() {
             <h2 class="text-xl font-bold">Verify Your Email</h2>
             <p>We have sent a verification code to your email. Please enter it below:</p>
             <input v-model="verificationCode" type="text" placeholder="Enter verification code" class="border-2 p-2" />
-            <button @click="handleVerifyCode" class="border-2 p-2 cursor-pointer">Verify</button>
+            <div class="flex gap-2">
+                <button @click="handleVerifyCode" class="border-2 p-2 cursor-pointer">Verify</button>
+                <button @click="handleResendVerification" class="border-2 p-2 cursor-pointer">Resend Code</button>
+            </div>
             <p class="text-green-600 mt-4" v-if="verificationSuccess">{{ verificationSuccess }}</p>
             <p class="text-red-600 mt-4" v-if="verificationError">{{ verificationError }}</p>
         </div>

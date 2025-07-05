@@ -9,29 +9,23 @@ export default defineEventHandler(async (event) => {
   await rateLimit(event)
   const body = await readBody(event);
   const { email } = body;
-
   if (!email) {
     return { success: false, message: "Email is required." };
   }
-
   const client = await clientPromise;
   const db = client.db("auth-nuxt");
   const users = db.collection("users");
-
   const user = await users.findOne({ email });
   if (!user) {
-    return { success: false, message: "A reset code will be sent to your email." };
+    return { success: false, message: "User not found." };
   }
-
-  // reset code and expiry
+  // Generate new code and expiry
   const resetCode = crypto.randomBytes(4).toString('hex');
-  const resetCodeExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 min
-
+  const resetCodeExpires = new Date(Date.now() + 15 * 60 * 1000);
   await users.updateOne(
     { email },
     { $set: { resetCode, resetCodeExpires } }
   );
-
   // Send email
   const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
@@ -42,7 +36,6 @@ export default defineEventHandler(async (event) => {
       pass: process.env.SMTP_PASS
     }
   });
-
   const { subject, text, html } = resetEmailTemplate(resetCode)
   await transporter.sendMail({
     from: process.env.SMTP_FROM || 'no-reply@example.com',
@@ -51,6 +44,5 @@ export default defineEventHandler(async (event) => {
     text,
     html
   });
-
-  return { success: true, message: "If the email exists, a reset code will be sent." };
+  return { success: true, message: "Reset code resent. Please check your email." };
 }); 

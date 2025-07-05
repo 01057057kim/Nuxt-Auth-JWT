@@ -3,8 +3,11 @@ import { readBody } from "h3";
 import bcrypt from "bcrypt";
 import { validatePassword } from "../../utils/validatePassword";
 import nodemailer from "nodemailer";
+import rateLimit from '~/server/middleware/rateLimit'
+import { passwordChangedTemplate } from '~/server/utils/emailTemplates'
 
 export default defineEventHandler(async (event) => {
+  await rateLimit(event)
   const body = await readBody(event);
   const { email, code, newPassword, confirmPassword } = body;
 
@@ -60,16 +63,13 @@ export default defineEventHandler(async (event) => {
     }
   });
 
+  const { subject, text, html } = passwordChangedTemplate()
   await transporter.sendMail({
     from: process.env.SMTP_FROM || 'no-reply@example.com',
     to: email,
-    subject: 'Password Changed Successfully',
-    text: `Your password has been changed successfully. If you did not do this, please contact support immediately.`,
-    html: `<div style=\"font-family: Arial, sans-serif; max-width: 400px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; background: #fafafa;\">
-      <h2 style=\"color: #4caf50;\">Password Changed</h2>
-      <p>Your password has been changed successfully.</p>
-      <p>If you did not do this, please contact support immediately.</p>
-    </div>`
+    subject,
+    text,
+    html
   });
 
   return { success: true, message: "Password changed successfully!" };
